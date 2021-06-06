@@ -29,13 +29,51 @@ namespace WindowsFormsApp1
         private Socket Socket;
         public string IP = "127.0.0.1";
         public int Port = 8080;
-        public int side = 4;
 
-        public GameModel(CellState firstTurn, bool againstAI)
+        private bool AIFirst;
+        public int Side { get; private set; }
+
+        public GameModel(bool againstAI, bool AIFirst, int side)
         {
-            CurrentTurn = firstTurn;
-            Field = new CellState[side*side];
+            Side = side;
+            CurrentTurn = CellState.X;
+            Field = new CellState[side * side];
+            this.AIFirst = AIFirst;
             AgainstAI = againstAI;
+        }
+
+        public async void FirstConnect()
+        {
+            if (!AgainstAI)
+                return;
+            IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(IP), Port);
+            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+            BeforeSendAction?.Invoke();
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Socket.Connect(ipPoint);
+                    if (AIFirst)
+                    {
+                        Socket.Send(new byte[] { (byte)Side, 0 });
+                        byte[] data = new byte[256];
+                        int bytes = Socket.Receive(data, data.Length, 0);
+                        ChangeField(data[0]);
+                    }
+                    else
+                        Socket.Send(new byte[] { (byte)Side, 1 });
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorOccured?.Invoke(ex.Message);
+                return;
+            }
+            AfterSendAction?.Invoke();
+            Socket.SendTimeout = 10000;
+            Socket.ReceiveTimeout = 10000;
         }
 
         public async void MakeTurn(int position)
@@ -44,26 +82,6 @@ namespace WindowsFormsApp1
 
             if (AgainstAI)
             {
-                if (Socket == null)
-                {
-                    IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(IP), Port);
-                    Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                    BeforeSendAction?.Invoke();
-
-                    try
-                    {
-                        await Task.Run(() => Socket.Connect(ipPoint));
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorOccured?.Invoke(ex.Message);
-                        return;
-                    }
-                    AfterSendAction?.Invoke();
-                    Socket.SendTimeout = 10000;
-                    Socket.ReceiveTimeout = 10000;
-                }
 
                 BeforeSendAction?.Invoke();
 
@@ -102,6 +120,27 @@ namespace WindowsFormsApp1
                 Socket.Close();
         }
 
+        public async void NewGameStarted()
+        {
+            if (Socket!=null && AgainstAI && AIFirst)
+            {
+                try
+                {
+                    byte[] data = new byte[256];
+                    await Task.Run(() =>
+                    {
+                        int bytes = Socket.Receive(data, data.Length, 0);
+                    });
+                    ChangeField(data[0]);
+                }
+                catch (Exception ex)
+                {
+                    ErrorOccured?.Invoke(ex.Message);
+                    return;
+                }
+            }
+        }
+
         private GameResult ChangeField(int position)
         {
             Field[position] = CurrentTurn;
@@ -112,7 +151,7 @@ namespace WindowsFormsApp1
             if (result != GameResult.IsGoing)
             {
                 CurrentTurn = CellState.X;
-                for (int i = 0; i < side*side; i++)
+                for (int i = 0; i < Side * Side; i++)
                     Field[i] = CellState.Empty;
                 GameEnd?.Invoke(result, wonPos);
 
@@ -125,16 +164,18 @@ namespace WindowsFormsApp1
             bool a = true;
             CellState sign;
             List<int> wonPos = new List<int>();
-            for (int i = 0; i < side; i++)//по вертикали
+
+            for (int i = 0; i < Side; i++)//по вертикали
             {
+                a = true;
                 wonPos.Clear();
                 sign = Field[i];
                 if (sign == CellState.Empty)
                     continue;
-                for (var j = 1; j < side; j++)
+                for (int j = 0; j < Side; j++)
                 {
-                    wonPos.Add(i + j * side);
-                    if (Field[i+j*side] != sign)
+                    wonPos.Add(i + j * Side);
+                    if (Field[i + j * Side] != sign)
                     {
                         a = false;
                         break;
@@ -143,17 +184,17 @@ namespace WindowsFormsApp1
                 if (a == true)
                     return (GameResult.Won, wonPos.ToArray());
             }
-            a = true;
-            for (int i = 0; i < side; i ++)//по горизонтали
+            for (int i = 0; i < Side; i++)//по горизонтали
             {
+                a = true;
                 wonPos.Clear();
-                sign = Field[i];
+                sign = Field[i * Side];
                 if (sign == CellState.Empty)
                     continue;
-                for (var j = 1; j < side; j++)
+                for (int j = 0; j < Side; j++)
                 {
-                    wonPos.Add(i * side + j);
-                    if (Field[i*side + j] != sign)
+                    wonPos.Add(i * Side + j);
+                    if (Field[i * Side + j] != sign)
                     {
                         a = false;
                         break;
@@ -167,10 +208,10 @@ namespace WindowsFormsApp1
             wonPos.Clear();
             if (sign != CellState.Empty)
             {
-                for (int i = 0; i < side; i++)
+                for (int i = 0; i < Side * Side; i += Side + 1)
                 {
-                    wonPos.Add(i + side * i);
-                    if (Field[i + side * i] != sign)
+                    wonPos.Add(i);
+                    if (Field[i] != sign)
                     {
                         a = false;
                         break;
@@ -179,14 +220,15 @@ namespace WindowsFormsApp1
                 if (a == true)
                     return (GameResult.Won, wonPos.ToArray());
             }
-
+            a = true;
+            sign = Field[Side - 1];
             wonPos.Clear();
             if (sign != CellState.Empty)
             {
-                for (int i = side - 1; i < side * side; i += side - 1)
+                for (int i = Side - 1; i < Side * Side - 1; i += Side - 1)
                 {
-                    wonPos.Add(i + side * i);
-                    if (Field[i + side * i] != sign)
+                    wonPos.Add(i);
+                    if (Field[i] != sign)
                     {
                         a = false;
                         break;
@@ -196,8 +238,7 @@ namespace WindowsFormsApp1
                     return (GameResult.Won, wonPos.ToArray());
             }
 
-
-            foreach (var item in Field)
+            foreach (CellState item in Field)
             {
                 if (item == CellState.Empty)
                     return (GameResult.IsGoing, null);

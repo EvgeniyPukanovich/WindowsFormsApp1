@@ -7,18 +7,28 @@ namespace WindowsFormsApp1
 {
     class ModelView : Form
     {
-
         public ModelView()
         {
             CreateMenu();
         }
 
+        private int State = 0;
+
         private void CreateMenu()
         {
+            State = 0;
             Button button1 = new System.Windows.Forms.Button();
             Button button2 = new System.Windows.Forms.Button();
+            NumericUpDown numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             TableLayoutPanel tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            TableLayoutPanel tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            Label label1 = new System.Windows.Forms.Label();
+            Label label2 = new System.Windows.Forms.Label();
+            ComboBox comboBox1 = new System.Windows.Forms.ComboBox();
+
             tableLayoutPanel1.SuspendLayout();
+            tableLayoutPanel2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(numericUpDown1)).BeginInit();
             SuspendLayout();
             // 
             // button1
@@ -39,7 +49,7 @@ namespace WindowsFormsApp1
             button1.Click += (sender, args) =>
             {
                 Controls.Clear();
-                CreateGame(new GameModel(CellState.X, false));
+                CreateGame(new GameModel(false, true, (int)numericUpDown1.Value));
             };
             // 
             // button2
@@ -60,20 +70,87 @@ namespace WindowsFormsApp1
             button2.Click += (sender, args) =>
             {
                 Controls.Clear();
-                CreateGame(new GameModel(CellState.X, true));
+                if ((string)comboBox1.SelectedItem == "Юзер")
+                    CreateGame(new GameModel(true, false, (int)numericUpDown1.Value));
+                else
+                    CreateGame(new GameModel(true, true, (int)numericUpDown1.Value));
             };
+            // 
+            // tableLayoutPanel2
+            // 
+            tableLayoutPanel2.Anchor = AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom
+            | System.Windows.Forms.AnchorStyles.Left
+            | System.Windows.Forms.AnchorStyles.Right;
+            tableLayoutPanel2.ColumnCount = 2;
+            tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel2.Controls.Add(label1, 0, 0);
+            tableLayoutPanel2.Controls.Add(numericUpDown1, 1, 0);
+            tableLayoutPanel2.Controls.Add(label2, 0, 1);
+            tableLayoutPanel2.Controls.Add(comboBox1, 1, 1);
+            tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            tableLayoutPanel2.Location = new System.Drawing.Point(592, 296);
+            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.RowCount = 2;
+            tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel2.Size = new System.Drawing.Size(205, 77);
+            tableLayoutPanel2.TabIndex = 3;
+            // 
+            // label1
+            // 
+            label1.Anchor = (System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            label1.AutoSize = true;
+            label1.Location = new System.Drawing.Point(3, 11);
+            label1.Name = "label1";
+            label1.Size = new System.Drawing.Size(96, 15);
+            label1.TabIndex = 0;
+            label1.Text = "Размер Поля";
+            // 
+            // numericUpDown1
+            // 
+            numericUpDown1.Anchor = (System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            numericUpDown1.Location = new System.Drawing.Point(105, 7);
+            numericUpDown1.Name = "numericUpDown1";
+            numericUpDown1.Size = new System.Drawing.Size(97, 23);
+            numericUpDown1.TabIndex = 1;
+            numericUpDown1.Maximum = 5;
+            numericUpDown1.Minimum = 2;
+            // 
+            // label2
+            // 
+            label2.Anchor = (System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(3, 50);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(96, 15);
+            label2.TabIndex = 2;
+            label2.Text = "Первый ход";
+            // 
+            // comboBox1
+            // 
+            comboBox1.Anchor = (System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right);
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new System.Drawing.Point(105, 46);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new System.Drawing.Size(97, 23);
+            comboBox1.TabIndex = 3;
+            comboBox1.Items.AddRange(new object[] { "ИИ", "Юзер" });
             // 
             // tableLayoutPanel1
             // 
-            tableLayoutPanel1.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right);
+            tableLayoutPanel1.Anchor = AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom
+            | System.Windows.Forms.AnchorStyles.Left
+            | System.Windows.Forms.AnchorStyles.Right;
             tableLayoutPanel1.ColumnCount = 3;
             tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.27273F));
             tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45.45454F));
             tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 27.27273F));
+
             tableLayoutPanel1.Controls.Add(button1, 1, 1);
             tableLayoutPanel1.Controls.Add(button2, 1, 3);
+            tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 2, 3);
+
             tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 5;
@@ -94,13 +171,17 @@ namespace WindowsFormsApp1
             Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             Name = "Menu";
             Text = "Tic Tac Toe";
-            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.ResumeLayout(true);
+            tableLayoutPanel2.ResumeLayout(false);
+            tableLayoutPanel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(numericUpDown1)).EndInit();
             ResumeLayout(false);
 
         }
 
         private void CreateGame(GameModel model)
         {
+            State = 1;
             GameModel gameModel = model;
             TableLayoutPanel table;
 
@@ -108,10 +189,10 @@ namespace WindowsFormsApp1
 
             table.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
-            for (int i = 0; i < gameModel.side; i++)
+            for (int i = 0; i < gameModel.Side; i++)
             {
-                table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f/gameModel.side));
-                table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f /gameModel.side ));
+                table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f / gameModel.Side));
+                table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / gameModel.Side));
             }
 
             table.RowStyles.Add(new RowStyle(SizeType.Percent, 7));
@@ -126,29 +207,31 @@ namespace WindowsFormsApp1
                 Controls.Clear();
                 CreateMenu();
             };
-            table.Controls.Add(backButton, 0, gameModel.side);
+            table.Controls.Add(backButton, 0, gameModel.Side);
 
 
             table.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             List<Button> buttons = new List<Button>();
-            bool[] disabledButtons = new bool[gameModel.side * gameModel.side];
+            bool[] disabledButtons = new bool[gameModel.Side * gameModel.Side];
 
-            for (int column = 0; column < gameModel.side; column++)
+
+            for (int row = 0; row < gameModel.Side; row++)
             {
-                for (int row = 0; row < gameModel.side; row++)
+                for (int column = 0; column < gameModel.Side; column++)
                 {
-                    var iRow = row;
-                    var iColumn = column;
-                    var button = new Button();
+                    int iRow = row;
+                    int iColumn = column;
+                    Button button = new Button();
                     button.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
                     button.Dock = DockStyle.Fill;
                     button.BackgroundImageLayout = ImageLayout.Zoom;
                     button.FlatStyle = FlatStyle.Flat;
                     button.Click += (sender, args) =>
                     {
-                        gameModel.MakeTurn(iColumn * gameModel.side + iRow);
+                        gameModel.MakeTurn(iRow * gameModel.Side + iColumn);
                     };
+                    button.Tag = iColumn * gameModel.Side + iRow + " " + iColumn + " " + iRow;
                     buttons.Add(button);
                     table.Controls.Add(button, iColumn, iRow);
                 }
@@ -158,13 +241,13 @@ namespace WindowsFormsApp1
 
             gameModel.BeforeSendAction += () =>
             {
-                foreach (var item in buttons)
+                foreach (Button item in buttons)
                     item.Enabled = false;
             };
 
             gameModel.AfterSendAction += () =>
             {
-                for (int i = 0; i < gameModel.side*gameModel.side; i++)
+                for (int i = 0; i < gameModel.Side * gameModel.Side; i++)
                 {
                     if (!disabledButtons[i])
                         buttons[i].Enabled = true;
@@ -182,7 +265,7 @@ namespace WindowsFormsApp1
 
             gameModel.GameEnd += (result, winPosition) =>
             {
-                foreach (var item in buttons)
+                foreach (Button item in buttons)
                     item.Enabled = false;
 
                 Timer timer = new Timer();
@@ -190,27 +273,29 @@ namespace WindowsFormsApp1
                 timer.Tick += (sender, args) =>
                 {
                     timer.Stop();
-                    foreach (var item in buttons)
+                    foreach (Button item in buttons)
                     {
                         item.BackColor = SystemColors.Control;
                         item.BackgroundImage = null;
                         item.Enabled = true;
                     }
+                    if (State == 1)
+                        gameModel.NewGameStarted();
                 };
 
                 if (winPosition == null)
                 {
-                    foreach (var item in buttons)
+                    foreach (Button item in buttons)
                     {
-                        //item.BackColor = Color.Yellow;
+                        item.BackColor = Color.Yellow;
                     }
                 }
                 else
                 {
-                    //foreach (var item in winPosition)
-                        //buttons[item].BackColor = Color.Green;
+                    foreach (int item in winPosition)
+                        buttons[item].BackColor = Color.Green;
                 }
-                for (int i = 0; i < gameModel.side*gameModel.side; i++)
+                for (int i = 0; i < gameModel.Side * gameModel.Side; i++)
                 {
                     disabledButtons[i] = false;
                 }
@@ -220,12 +305,12 @@ namespace WindowsFormsApp1
             gameModel.ErrorOccured += (message) =>
             {
                 MessageBox.Show(message);
-                //Invoke((MethodInvoker)(() => { Controls.Clear(); CreateMenu(); }));
                 Controls.Clear();
                 CreateMenu();
             };
             table.Dock = DockStyle.Fill;
             Controls.Add(table);
+            gameModel.FirstConnect();
         }
     }
 }
